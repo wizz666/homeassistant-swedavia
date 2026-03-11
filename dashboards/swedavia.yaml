@@ -1,0 +1,408 @@
+title: Flyginfo Swedavia
+views:
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # FLIK 1 – AVGÅNGAR
+  # ══════════════════════════════════════════════════════════════════════════
+  - title: Avgångar
+    path: departures
+    icon: mdi:airplane-takeoff
+    panel: false
+    badges: []
+    cards:
+      - type: vertical-stack
+        cards:
+
+          # ── Header: flygplats + stats + klocka ────────────────────────────
+          - type: custom:button-card
+            entity: input_select.swedavia_active_airport
+            show_name: false
+            show_icon: false
+            show_state: false
+            show_label: true
+            styles:
+              card:
+                - background: "#0d0d0d"
+                - border: "1px solid #2a2a2a"
+                - border-radius: "6px"
+                - padding: "14px 18px"
+              label:
+                - width: "100%"
+                - font-family: "'Courier New', Courier, monospace"
+            label: |
+              [[[
+                const ap = (states['input_select.swedavia_active_airport']?.state||'GOT').toLowerCase();
+                const airport = states['input_select.swedavia_active_airport']?.state||'GOT';
+                const names = {ARN:'Stockholm Arlanda',GOT:'Göteborg Landvetter',BMA:'Stockholm Bromma',MMX:'Malmö Airport',LLA:'Luleå Airport',UME:'Umeå Airport',OSD:'Åre Östersund',VBY:'Visby Airport',RNB:'Ronneby Airport',KRN:'Kiruna Airport'};
+                const dep  = states[`sensor.swedavia_${ap}_departures_today`]?.state||'–';
+                const arr  = states[`sensor.swedavia_${ap}_arrivals_today`]?.state||'–';
+                const wait = states[`sensor.swedavia_${ap}_security_wait`]?.state||'–';
+                const now  = new Date();
+                const time = now.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'});
+                const date = now.toLocaleDateString('sv-SE',{weekday:'short',day:'numeric',month:'short'});
+                return `
+                  <div style="display:flex;justify-content:space-between;align-items:stretch;gap:12px">
+                    <div style="flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between">
+                      <div style="color:#ffc200;font-size:1.0rem;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">✈ ${names[airport]||airport}</div>
+                      <div style="color:#aaaaaa;font-size:0.75rem;margin-top:5px;white-space:nowrap">🛫 ${dep} avg &nbsp;·&nbsp; 🛬 ${arr} ank &nbsp;·&nbsp; 🔒 Kö: ${wait} min</div>
+                    </div>
+                    <div style="flex-shrink:0;display:flex;flex-direction:column;justify-content:space-between;align-items:center;text-align:center">
+                      <div style="color:#ffffff;font-size:1.0rem;font-weight:bold;white-space:nowrap">${time}</div>
+                      <div style="color:#aaaaaa;font-size:0.75rem;white-space:nowrap">${date}</div>
+                    </div>
+                  </div>`;
+              ]]]
+
+          # ── Flygplatsväljare ───────────────────────────────────────────────
+          - type: custom:button-card
+            entity: input_select.swedavia_active_airport
+            show_name: false
+            show_icon: false
+            show_state: false
+            show_label: true
+            tap_action:
+              action: more-info
+            styles:
+              card:
+                - background: "#0d0d0d"
+                - border: "1px solid #2a2a2a"
+                - border-radius: "6px"
+                - padding: "12px 18px"
+              label:
+                - width: "100%"
+                - font-family: "'Courier New', Courier, monospace"
+            label: |
+              [[[
+                const airport = states['input_select.swedavia_active_airport']?.state||'GOT';
+                const names = {ARN:'Stockholm Arlanda',GOT:'Göteborg Landvetter',BMA:'Stockholm Bromma',MMX:'Malmö Airport',LLA:'Luleå Airport',UME:'Umeå Airport',OSD:'Åre Östersund',VBY:'Visby Airport',RNB:'Ronneby Airport',KRN:'Kiruna Airport'};
+                return `
+                  <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="color:#aaaaaa;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em">Välj flygplats</span>
+                    <span style="color:#ffffff;font-size:0.95rem;font-weight:bold">${airport} &nbsp;<span style="color:#555;font-size:0.75rem">– ${names[airport]||''}</span> &nbsp;▾</span>
+                  </div>`;
+              ]]]
+
+          # ── FIDS Avgångstavla ──────────────────────────────────────────────
+          - type: custom:button-card
+            entity: input_select.swedavia_active_airport
+            show_name: false
+            show_icon: false
+            show_state: false
+            show_label: true
+            styles:
+              card:
+                - background: "#000000"
+                - border: "2px solid #1c1c1c"
+                - border-radius: "6px"
+                - padding: "0"
+              label:
+                - width: "100%"
+                - display: "block"
+                - padding: "0"
+            label: |
+              [[[
+                const ap = (states['input_select.swedavia_active_airport']?.state||'GOT').toLowerCase();
+                const airport = states['input_select.swedavia_active_airport']?.state||'GOT';
+                const names = {ARN:'Stockholm Arlanda',GOT:'Göteborg Landvetter',BMA:'Stockholm Bromma',MMX:'Malmö Airport',LLA:'Luleå Airport',UME:'Umeå Airport',OSD:'Åre Östersund',VBY:'Visby Airport',RNB:'Ronneby Airport',KRN:'Kiruna Airport'};
+                const sensor = states[`sensor.swedavia_${ap}_departures_today`];
+                const flights = sensor?.attributes?.upcoming_flights || [];
+
+                const rows = flights.map((f,i) => {
+                  const s = (f.status||'').toUpperCase();
+                  let color, fw;
+                  if      (s.includes('AVGÅTT')||s.includes('DEPART'))   {color='#777';fw='normal';}
+                  else if (s.includes('INSTÄLLT')||s.includes('CANCEL')) {color='#f33';fw='bold';}
+                  else if (s.includes('FÖRSEN')||s.includes('DELAY'))    {color='#f80';fw='bold';}
+                  else if (s.includes('BOARDING'))                        {color='#0fc';fw='bold';}
+                  else if (s.includes('GATE'))                            {color='#0da';fw='bold';}
+                  else                                                    {color='#0c4';fw='normal';}
+                  const bg = i%2===0?'#000':'#080808';
+                  const dest = (f.destination_name||f.destination||'?').substring(0,22);
+                  return `<tr style="background:${bg};border-bottom:1px solid #111;font-size:0.82rem">
+                    <td style="padding:5px 8px;color:#fff;font-weight:bold;white-space:nowrap">${f.scheduled||''}</td>
+                    <td style="padding:5px 8px;color:#fff">${f.flight_id||''}</td>
+                    <td style="padding:5px 8px;color:#fff">${dest}</td>
+                    <td style="padding:5px 8px;text-align:center;color:${color};font-weight:${fw};white-space:nowrap">${f.status_icon||''} ${f.status||''}</td>
+                    <td style="padding:5px 8px;text-align:center;color:#fff">${f.gate||'–'}</td>
+                  </tr>`;
+                }).join('');
+
+                const empty = flights.length===0
+                  ? `<tr><td colspan="5" style="padding:24px;text-align:center;color:#555;font-size:0.82rem">INGA KOMMANDE AVGÅNGAR</td></tr>`
+                  : '';
+
+                return `<div style="padding:14px 16px 16px;font-family:'Courier New',Courier,monospace">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #ffc200;padding-bottom:8px">
+                    <span style="color:#fff;font-size:0.95rem;font-weight:bold;letter-spacing:0.08em">🛫 AVGÅNGAR / DEPARTURES</span>
+                    <span style="color:#ffc200;font-size:0.75rem">${names[airport]||airport}</span>
+                  </div>
+                  <table style="width:100%;border-collapse:collapse">
+                    <tr style="border-bottom:1px solid #2a2a2a">
+                      <th style="text-align:left;padding:6px 8px 5px;color:#ffc200;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em">Tid</th>
+                      <th style="text-align:left;padding:6px 8px 5px;color:#ffc200;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em">Flygnr</th>
+                      <th style="text-align:left;padding:6px 8px 5px;color:#ffc200;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em">Destination</th>
+                      <th style="text-align:center;padding:6px 8px 5px;color:#ffc200;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em">Status</th>
+                      <th style="text-align:center;padding:6px 8px 5px;color:#ffc200;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em">Gate</th>
+                    </tr>
+                    ${empty}${rows}
+                  </table>
+                </div>`;
+              ]]]
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # FLIK 2 – ANKOMSTER
+  # ══════════════════════════════════════════════════════════════════════════
+  - title: Ankomster
+    path: arrivals
+    icon: mdi:airplane-landing
+    panel: false
+    badges: []
+    cards:
+      - type: vertical-stack
+        cards:
+
+          # ── Header: flygplats + stats + klocka ────────────────────────────
+          - type: custom:button-card
+            entity: input_select.swedavia_active_airport
+            show_name: false
+            show_icon: false
+            show_state: false
+            show_label: true
+            styles:
+              card:
+                - background: "#0d0d0d"
+                - border: "1px solid #2a2a2a"
+                - border-radius: "6px"
+                - padding: "14px 18px"
+              label:
+                - width: "100%"
+                - font-family: "'Courier New', Courier, monospace"
+            label: |
+              [[[
+                const ap = (states['input_select.swedavia_active_airport']?.state||'GOT').toLowerCase();
+                const airport = states['input_select.swedavia_active_airport']?.state||'GOT';
+                const names = {ARN:'Stockholm Arlanda',GOT:'Göteborg Landvetter',BMA:'Stockholm Bromma',MMX:'Malmö Airport',LLA:'Luleå Airport',UME:'Umeå Airport',OSD:'Åre Östersund',VBY:'Visby Airport',RNB:'Ronneby Airport',KRN:'Kiruna Airport'};
+                const dep  = states[`sensor.swedavia_${ap}_departures_today`]?.state||'–';
+                const arr  = states[`sensor.swedavia_${ap}_arrivals_today`]?.state||'–';
+                const wait = states[`sensor.swedavia_${ap}_security_wait`]?.state||'–';
+                const now  = new Date();
+                const time = now.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'});
+                const date = now.toLocaleDateString('sv-SE',{weekday:'short',day:'numeric',month:'short'});
+                return `
+                  <div style="display:flex;justify-content:space-between;align-items:stretch;gap:12px">
+                    <div style="flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between">
+                      <div style="color:#ffc200;font-size:1.0rem;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">✈ ${names[airport]||airport}</div>
+                      <div style="color:#aaaaaa;font-size:0.75rem;margin-top:5px;white-space:nowrap">🛫 ${dep} avg &nbsp;·&nbsp; 🛬 ${arr} ank &nbsp;·&nbsp; 🔒 Kö: ${wait} min</div>
+                    </div>
+                    <div style="flex-shrink:0;display:flex;flex-direction:column;justify-content:space-between;align-items:center;text-align:center">
+                      <div style="color:#ffffff;font-size:1.0rem;font-weight:bold;white-space:nowrap">${time}</div>
+                      <div style="color:#aaaaaa;font-size:0.75rem;white-space:nowrap">${date}</div>
+                    </div>
+                  </div>`;
+              ]]]
+
+          # ── Flygplatsväljare ───────────────────────────────────────────────
+          - type: custom:button-card
+            entity: input_select.swedavia_active_airport
+            show_name: false
+            show_icon: false
+            show_state: false
+            show_label: true
+            tap_action:
+              action: more-info
+            styles:
+              card:
+                - background: "#0d0d0d"
+                - border: "1px solid #2a2a2a"
+                - border-radius: "6px"
+                - padding: "12px 18px"
+              label:
+                - width: "100%"
+                - font-family: "'Courier New', Courier, monospace"
+            label: |
+              [[[
+                const airport = states['input_select.swedavia_active_airport']?.state||'GOT';
+                const names = {ARN:'Stockholm Arlanda',GOT:'Göteborg Landvetter',BMA:'Stockholm Bromma',MMX:'Malmö Airport',LLA:'Luleå Airport',UME:'Umeå Airport',OSD:'Åre Östersund',VBY:'Visby Airport',RNB:'Ronneby Airport',KRN:'Kiruna Airport'};
+                return `
+                  <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="color:#aaaaaa;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em">Välj flygplats</span>
+                    <span style="color:#ffffff;font-size:0.95rem;font-weight:bold">${airport} &nbsp;<span style="color:#555;font-size:0.75rem">– ${names[airport]||''}</span> &nbsp;▾</span>
+                  </div>`;
+              ]]]
+
+          # ── FIDS Ankomsttavla ──────────────────────────────────────────────
+          - type: custom:button-card
+            entity: input_select.swedavia_active_airport
+            show_name: false
+            show_icon: false
+            show_state: false
+            show_label: true
+            styles:
+              card:
+                - background: "#000000"
+                - border: "2px solid #1c1c1c"
+                - border-radius: "6px"
+                - padding: "0"
+              label:
+                - width: "100%"
+                - display: "block"
+                - padding: "0"
+            label: |
+              [[[
+                const ap = (states['input_select.swedavia_active_airport']?.state||'GOT').toLowerCase();
+                const airport = states['input_select.swedavia_active_airport']?.state||'GOT';
+                const names = {ARN:'Stockholm Arlanda',GOT:'Göteborg Landvetter',BMA:'Stockholm Bromma',MMX:'Malmö Airport',LLA:'Luleå Airport',UME:'Umeå Airport',OSD:'Åre Östersund',VBY:'Visby Airport',RNB:'Ronneby Airport',KRN:'Kiruna Airport'};
+                const sensor = states[`sensor.swedavia_${ap}_arrivals_today`];
+                const flights = sensor?.attributes?.upcoming_flights || [];
+
+                const rows = flights.map((f,i) => {
+                  const s = (f.status||'').toUpperCase();
+                  let color, fw;
+                  if      (s.includes('ANKOMMIT')||s.includes('ARRIV'))  {color='#777';fw='normal';}
+                  else if (s.includes('INSTÄLLT')||s.includes('CANCEL')) {color='#f33';fw='bold';}
+                  else if (s.includes('FÖRSEN')||s.includes('DELAY'))    {color='#f80';fw='bold';}
+                  else if (s.includes('LANDAD'))                          {color='#48f';fw='bold';}
+                  else if (s.includes('BAGGAGE')||s.includes('BAND'))    {color='#0fc';fw='bold';}
+                  else                                                    {color='#0c4';fw='normal';}
+                  const bg = i%2===0?'#000':'#080808';
+                  const origin = (f.origin_name||f.origin||'?').substring(0,22);
+                  return `<tr style="background:${bg};border-bottom:1px solid #111;font-size:0.82rem">
+                    <td style="padding:5px 8px;color:#fff;font-weight:bold;white-space:nowrap">${f.scheduled||''}</td>
+                    <td style="padding:5px 8px;color:#fff">${f.flight_id||''}</td>
+                    <td style="padding:5px 8px;color:#fff">${origin}</td>
+                    <td style="padding:5px 8px;text-align:center;color:${color};font-weight:${fw};white-space:nowrap">${f.status_icon||''} ${f.status||''}</td>
+                    <td style="padding:5px 8px;text-align:center;color:#fff">${f.belt||'–'}</td>
+                  </tr>`;
+                }).join('');
+
+                const empty = flights.length===0
+                  ? `<tr><td colspan="5" style="padding:24px;text-align:center;color:#555;font-size:0.82rem">INGA KOMMANDE ANKOMSTER</td></tr>`
+                  : '';
+
+                return `<div style="padding:14px 16px 16px;font-family:'Courier New',Courier,monospace">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #ffc200;padding-bottom:8px">
+                    <span style="color:#fff;font-size:0.95rem;font-weight:bold;letter-spacing:0.08em">🛬 ANKOMSTER / ARRIVALS</span>
+                    <span style="color:#ffc200;font-size:0.75rem">${names[airport]||airport}</span>
+                  </div>
+                  <table style="width:100%;border-collapse:collapse">
+                    <tr style="border-bottom:1px solid #2a2a2a">
+                      <th style="text-align:left;padding:6px 8px 5px;color:#ffc200;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em">Tid</th>
+                      <th style="text-align:left;padding:6px 8px 5px;color:#ffc200;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em">Flygnr</th>
+                      <th style="text-align:left;padding:6px 8px 5px;color:#ffc200;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em">Från</th>
+                      <th style="text-align:center;padding:6px 8px 5px;color:#ffc200;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em">Status</th>
+                      <th style="text-align:center;padding:6px 8px 5px;color:#ffc200;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em">Band</th>
+                    </tr>
+                    ${empty}${rows}
+                  </table>
+                </div>`;
+              ]]]
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # FLIK 3 – SÖK FLYG
+  # ══════════════════════════════════════════════════════════════════════════
+  - title: Sök
+    path: search
+    icon: mdi:magnify
+    panel: false
+    badges: []
+    cards:
+      - type: vertical-stack
+        cards:
+
+          - type: entities
+            title: "🔍 Sök flygnummer"
+            show_header_toggle: false
+            card_mod:
+              style: |
+                ha-card { background: #0d0d0d !important; border: 1px solid #2a2a2a !important; }
+                .card-header { color: #ffc200 !important; }
+            entities:
+              - entity: input_text.swedavia_search_flight
+                name: "Flygnummer (t.ex. SK1234)"
+
+          - type: custom:button-card
+            entity: input_text.swedavia_search_flight
+            show_name: false
+            show_icon: false
+            show_state: false
+            show_label: true
+            tap_action:
+              action: call-service
+              service: swedavia.search_flight
+              service_data:
+                flight_id: "[[[ return states['input_text.swedavia_search_flight']?.state||''; ]]]"
+            styles:
+              card:
+                - background: "#1a3a6e"
+                - border: "1px solid #2a5aaa"
+                - border-radius: "6px"
+                - padding: "16px"
+                - cursor: "pointer"
+              label:
+                - width: "100%"
+                - font-family: "'Courier New', Courier, monospace"
+                - text-align: "center"
+            label: |
+              [[[
+                return `<div style="text-align:center;width:100%">
+                  <div style="font-size:1.5rem;margin-bottom:6px">🔍</div>
+                  <div style="color:#ffffff;font-size:1rem;font-weight:bold;letter-spacing:0.08em">SÖK FLYG</div>
+                  <div style="color:#8ab4f8;font-size:0.75rem;margin-top:4px">Tryck för att söka bland alla flygplatser</div>
+                </div>`;
+              ]]]
+
+          - type: custom:button-card
+            entity: sensor.swedavia_sokresultat
+            show_icon: false
+            show_name: false
+            show_state: false
+            show_label: true
+            styles:
+              card:
+                - background: "#0d0d0d"
+                - border: "1px solid #2a2a2a"
+                - border-radius: "6px"
+                - padding: "16px"
+              label:
+                - width: "100%"
+                - font-family: "'Courier New', Courier, monospace"
+            label: |
+              [[[
+                const result = states['sensor.swedavia_sokresultat']?.state||'';
+                if (!result || result==='Ange flygnummer' || result==='unavailable') {
+                  return `<span style="color:#888;font-size:0.85rem">Ange ett flygnummer ovan och tryck SÖK.</span>`;
+                }
+                // Format: "GOT  KL1239  ←  Amsterdam  22:20  📅 PLANERAD"
+                // Arrow + 2 spaces splits arrow from city — fix by joining parts[2]+parts[3]
+                const parts = result.split(/\s{2,}/).map(p => p.trim()).filter(Boolean);
+                const ap     = parts[0]||'';
+                const flight = parts[1]||'';
+                const arrow  = parts[2]||'';   // "→" or "←"
+                const city   = parts[3]||'';   // "Amsterdam"
+                const rutt   = arrow + ' ' + city;
+                const time   = parts[4]||'';
+                const status = parts[5]||'';
+                const gate   = parts[6]||'–';
+                const s = status.toUpperCase();
+                let color='#00cc44';
+                if (s.includes('INSTÄLLT')||s.includes('CANCEL'))      color='#ff3333';
+                else if (s.includes('AVGÅTT')||s.includes('ANKOMMIT')) color='#777777';
+                else if (s.includes('FÖRSEN')||s.includes('DELAY'))    color='#ff8800';
+                else if (s.includes('BOARDING'))                        color='#00ffcc';
+                const row = (label, value, vc) =>
+                  `<tr>
+                    <td style="padding:5px 14px 5px 0;color:#aaaaaa;font-size:0.78rem;white-space:nowrap">${label}</td>
+                    <td style="padding:5px 0;color:${vc};font-size:0.85rem;font-weight:bold">${value}</td>
+                  </tr>`;
+                return `<div>
+                  <div style="color:#888;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;border-bottom:1px solid #2a2a2a;padding-bottom:8px">Sökresultat</div>
+                  <table style="border-collapse:collapse;width:100%">
+                    ${row('Flygplats', ap,     '#ffc200')}
+                    ${row('Flygnr',    flight, '#ffffff')}
+                    ${row('Rutt',      rutt,   '#ffffff')}
+                    ${row('Tid',       time,   '#ffffff')}
+                    ${row('Status',    status, color)}
+                    ${row('Gate/Band', gate,   '#ffffff')}
+                  </table>
+                </div>`;
+              ]]]

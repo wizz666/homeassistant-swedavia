@@ -1,0 +1,48 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Swedavia",
+        "description": "Get API keys at https://apideveloper.swedavia.se/\n\nRate limit note: 10 airports × 60 min interval ≈ 14,400 req/month (free tier: 10,000/month). Use fewer airports or longer intervals to stay within limits.",
+        "data": {
+          "flightinfo_api_key": "FlightInfo API key",
+          "waittime_api_key": "WaitTime API key",
+          "airports": "Airports to monitor",
+          "flightinfo_interval": "Flight update interval (minutes)",
+          "waittime_interval": "Queue update interval (minutes)"
+        },
+        "data_description": {
+          "flightinfo_api_key": "Subscription key for FlightInfo v2 API",
+          "waittime_api_key": "Subscription key for WaitTime Public v2 API",
+          "airports": "Select one or more Swedavia airports",
+          "flightinfo_interval": "Recommended: ≥ 60 min to stay within the free tier",
+          "waittime_interval": "Recommended: ≥ 30 min to stay within the free tier"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid API key (HTTP 401/403)",
+      "cannot_connect": "Cannot connect to Swedavia API",
+      "no_airports": "Select at least one airport",
+      "unknown": "Unexpected error – check the logs"
+    },
+    "abort": {
+      "already_configured": "Swedavia is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Swedavia – settings",
+        "data": {
+          "airports": "Airports to monitor",
+          "flightinfo_interval": "Flight update interval (minutes)",
+          "waittime_interval": "Queue update interval (minutes)"
+        }
+      }
+    },
+    "error": {
+      "no_airports": "Select at least one airport"
+    }
+  }
+}

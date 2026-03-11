@@ -1,0 +1,48 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Konfigurera Swedavia",
+        "description": "Hämta API-nycklar på https://apideveloper.swedavia.se/\n\nNotera rate limit: 10 flygplatser × 60 min intervall ≈ 14 400 req/månad (free tier: 10 000/månad). Välj färre flygplatser eller längre intervall för att hålla dig inom gränsen.",
+        "data": {
+          "flightinfo_api_key": "FlightInfo API-nyckel",
+          "waittime_api_key": "WaitTime API-nyckel",
+          "airports": "Flygplatser att övervaka",
+          "flightinfo_interval": "Uppdateringsintervall flyg (minuter)",
+          "waittime_interval": "Uppdateringsintervall kötid (minuter)"
+        },
+        "data_description": {
+          "flightinfo_api_key": "Prenumerationsnyckel för FlightInfo v2 API",
+          "waittime_api_key": "Prenumerationsnyckel för WaitTime Public v2 API",
+          "airports": "Välj en eller flera Swedavia-flygplatser",
+          "flightinfo_interval": "Rekommenderat: ≥ 60 min för att hålla sig inom gratisgränsen",
+          "waittime_interval": "Rekommenderat: ≥ 30 min för att hålla sig inom gratisgränsen"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ogiltig API-nyckel (HTTP 401/403)",
+      "cannot_connect": "Kan inte ansluta till Swedavia API",
+      "no_airports": "Välj minst en flygplats",
+      "unknown": "Oväntat fel – kontrollera loggarna"
+    },
+    "abort": {
+      "already_configured": "Swedavia är redan konfigurerat"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Swedavia – inställningar",
+        "data": {
+          "airports": "Flygplatser att övervaka",
+          "flightinfo_interval": "Uppdateringsintervall flyg (minuter)",
+          "waittime_interval": "Uppdateringsintervall kötid (minuter)"
+        }
+      }
+    },
+    "error": {
+      "no_airports": "Välj minst en flygplats"
+    }
+  }
+}

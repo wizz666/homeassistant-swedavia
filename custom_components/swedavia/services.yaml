@@ -1,0 +1,21 @@
+search_flight:
+  name: "Sök flygnummer"
+  description: >
+    Söker efter ett specifikt flyg bland alla övervakade flygplatser.
+    Söker först i cachad data; om ej funnet görs ett live-anrop till FlightInfo API.
+    Resultatet fires som event 'swedavia_flight_found' eller 'swedavia_flight_not_found'.
+  fields:
+    flight_id:
+      name: "Flygnummer"
+      description: "IATA-flygnummer, t.ex. SK1234 eller FR2345"
+      required: true
+      example: "SK1234"
+      selector:
+        text:
+    airport:
+      name: "Flygplats (valfritt)"
+      description: "Begränsa sökning till en specifik flygplats (IATA-kod). Utelämna för att söka alla konfigurerade flygplatser."
+      required: false
+      example: "ARN"
+      selector:
+        text:

@@ -1,0 +1,57 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Swedavia – Input helpers och template-sensor för flygtavla & sökning
+# ─────────────────────────────────────────────────────────────────────────────
+
+input_select:
+  swedavia_active_airport:
+    name: "Swedavia – Aktiv flygplats"
+    icon: mdi:airplane-marker
+    options:
+      - "ARN"
+      - "GOT"
+      - "BMA"
+      - "MMX"
+      - "LLA"
+      - "UME"
+      - "OSD"
+      - "VBY"
+      - "RNB"
+      - "KRN"
+    initial: "ARN"
+
+input_text:
+  swedavia_search_flight:
+    name: "Sök flygnummer"
+    icon: mdi:magnify
+    max: 10
+    initial: ""
+
+template:
+  - sensor:
+      - name: "Swedavia Sökresultat"
+        unique_id: "swedavia_search_result"
+        icon: "mdi:airplane-search"
+        state: >-
+          {%- set fid = states('input_text.swedavia_search_flight') | upper | trim -%}
+          {%- if fid in ('', 'UNKNOWN', 'NONE') -%}
+            Ange flygnummer
+          {%- else -%}
+            {%- set ns = namespace(found=false, result='Hittades ej: ' + fid) -%}
+            {%- set airports = ['ARN','GOT','BMA','MMX','LLA','UME','OSD','VBY','RNB','KRN'] -%}
+            {%- for ap in airports -%}
+              {%- for dir in ['departures', 'arrivals'] -%}
+                {%- set sname = 'sensor.swedavia_' + ap | lower + '_' + dir + '_today' -%}
+                {%- for f in state_attr(sname, 'upcoming_flights') or [] -%}
+                  {%- if not ns.found and f.flight_id | upper == fid -%}
+                    {%- set ns.found = true -%}
+                    {%- if dir == 'departures' -%}
+                      {%- set ns.result = ap + '  ' + f.flight_id + '  →  ' + (f.destination_name or f.destination or '?') + '  ' + f.scheduled + '  ' + f.status_icon + ' ' + f.status + (('  Gate ' + f.gate) if f.gate else '') -%}
+                    {%- else -%}
+                      {%- set ns.result = ap + '  ' + f.flight_id + '  ←  ' + (f.origin_name or f.origin or '?') + '  ' + f.scheduled + '  ' + f.status_icon + ' ' + f.status + (('  Band ' + f.belt) if f.belt else '') -%}
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endfor -%}
+            {%- endfor -%}
+            {{ ns.result }}
+          {%- endif -%}

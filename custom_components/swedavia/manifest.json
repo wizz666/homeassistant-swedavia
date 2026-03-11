@@ -1,0 +1,15 @@
+{
+  "domain": "swedavia",
+  "name": "Swedavia",
+  "version": "1.2.4",
+  "description": "Flyginformation och kötider för Swedavias svenska flygplatser",
+  "documentation": "https://github.com/wizz666/homeassistant-swedavia",
+  "issue_tracker": "https://github.com/wizz666/homeassistant-swedavia/issues",
+  "codeowners": ["@wizz666"],
+  "requirements": [],
+  "dependencies": [],
+  "after_dependencies": [],
+  "config_flow": true,
+  "iot_class": "cloud_polling",
+  "integration_type": "service"
+}
