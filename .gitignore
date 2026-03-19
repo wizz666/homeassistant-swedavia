@@ -1,0 +1,11 @@
+# Home Assistant
+secrets.yaml
+*.db
+*.log
+__pycache__/
+.storage/
+
+# OS
+.DS_Store
+Thumbs.db
+
