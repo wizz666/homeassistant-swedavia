@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Konfigurera Swedavia",
-        "description": "Hämta API-nycklar på https://apideveloper.swedavia.se/\n\nBehöver du uppskatta förbrukning? 10 flygplatser × 60 min intervall ≈ 14 400 req/månad (free tier: 10 000/månad).",
+        "description": "Ange dina Swedavia API-nycklar. Se README för instruktioner om hur du registrerar dig på Swedavia API Developer Portal.\n\nBehöver du uppskatta förbrukning? 10 flygplatser × 60 min intervall ≈ 14 400 req/månad (free tier: 10 000/månad).",
         "data": {
           "flightinfo_api_key": "FlightInfo API-nyckel",
           "waittime_api_key": "WaitTime API-nyckel",

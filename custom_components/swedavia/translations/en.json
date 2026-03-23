@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configure Swedavia",
-        "description": "Get API keys at https://apideveloper.swedavia.se/\n\nRate limit note: 10 airports × 60 min interval ≈ 14,400 req/month (free tier: 10,000/month). Use fewer airports or longer intervals to stay within limits.",
+        "description": "Enter your Swedavia API keys. See the README for instructions on how to register at the Swedavia API Developer Portal.\n\nRate limit note: 10 airports × 60 min interval ≈ 14,400 req/month (free tier: 10,000/month). Use fewer airports or longer intervals to stay within limits.",
         "data": {
           "flightinfo_api_key": "FlightInfo API key",
           "waittime_api_key": "WaitTime API key",
