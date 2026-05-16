@@ -2,7 +2,9 @@
   "domain": "swedavia",
   "name": "Swedavia",
   "after_dependencies": [],
-  "codeowners": ["@wizz666"],
+  "codeowners": [
+    "@wizz666"
+  ],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/wizz666/homeassistant-swedavia",
@@ -10,5 +12,5 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/wizz666/homeassistant-swedavia/issues",
   "requirements": [],
-  "version": "1.2.4"
+  "version": "1.2.5"
 }
